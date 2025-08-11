@@ -26,6 +26,10 @@ class GraphComponent(BaseModel, ABC):
         a node while an edge can be prefixed by "E" followed by any
         number of characters. One can also use an unique identity
         generator to define the name.
+
+    **Note:** Typically, the unique identification key should only be
+    used by a developer or an adminitrator and must not be exposed to
+    a third party application or an API call.
     """
 
     cidx : Optional[str] = Field(..., description = "Unique Identity")
@@ -56,7 +60,9 @@ class GraphNode(GraphComponent):
 
     :ivar label: Display label of a node. The node label can be the
         same as the ``cidx`` i.e., the component identity key, or can
-        be a custom one based on user preference.
+        be a custom one based on user preference. For any external
+        applications one should always refer to the label attribute
+        instead of the unique identity key.
 
     :ivar mincapacity: The minimum capacity of a node. Typically, any
         supply chain and logistics entity has a capacity associated
