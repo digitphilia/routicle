@@ -51,9 +51,13 @@ class NTPlants(GraphNode):
 
     :ivar rate: Production rate, which should be in the same unit as
         that of the capacity, per day.
+
+    :ivar demand: Demand of a plant, typically for scheduling or for
+        an inventory management problem.
     """
 
     rate : float
+    demand : float
 
     @property
     def color(self) -> str:
