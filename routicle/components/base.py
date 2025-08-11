@@ -92,6 +92,14 @@ class GraphNode(GraphComponent):
         return "#42B3E3"
 
 
+    @property
+    def attributes(self) -> dict:
+        return {
+            k : v for k, v in vars(self).items()
+            if k not in ["cidx", "label"] # discarded keys
+        }
+
+
 class GraphEdge(GraphComponent):
     """
     Abstract Class Defination of a Edge
