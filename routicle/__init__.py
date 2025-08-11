@@ -18,4 +18,5 @@ import os
 __version__ = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION"), "r").read()
 
 # init-time options registrations
+from routicle import utils # noqa: F401, F403
 from routicle import components # noqa: F401, F403
