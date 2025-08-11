@@ -57,9 +57,25 @@ class GraphNode(GraphComponent):
     :ivar label: Display label of a node. The node label can be the
         same as the ``cidx`` i.e., the component identity key, or can
         be a custom one based on user preference.
+
+    :ivar mincapacity: The minimum capacity of a node. Typically, any
+        supply chain and logistics entity has a capacity associated
+        with it - for example plants, warehouses, etc. The minimum
+        capacity can be derived from additional models for maintenance
+        of norms or minimum stock.
+
+    :ivar maxcapacity: The maximum capacity of an entity, defaults to
+        infinity.
+    
+    **Note:** The capacity should always be in a standard unit or the
+    same should be maintained throughout.
     """
 
     label : Optional[str] = Field(None, description = "Display Label")
+
+    # ? Minimum and Maximum Capacity of a Node
+    mincapacity : float = 0.0
+    maxcapacity : float = float("inf")
 
 
     def __init__(self, **attributes) -> None:
