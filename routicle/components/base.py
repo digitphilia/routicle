@@ -28,7 +28,7 @@ class GraphComponent(BaseModel, ABC):
         generator to define the name.
     """
 
-    cidx : str = Field(..., description = "Unique Identity")
+    cidx : Optional[str] = Field(..., description = "Unique Identity")
 
 
     @property
