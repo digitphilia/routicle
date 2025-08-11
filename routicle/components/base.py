@@ -132,3 +132,18 @@ class GraphEdge(GraphComponent):
     @property
     def color(self) -> str:
         return "#191A1C"
+
+
+    @property
+    @abstractmethod
+    def weight(self) -> float:
+        """
+        Weight of an Edge for Path Calculation
+
+        An edge must always have an weight associated with it, which
+        can be a combination of fields like cost, time, etc. For a
+        graph which does not have an weight - there is no optimization
+        possible and greedy search must always be avoided.
+        """
+
+        pass
