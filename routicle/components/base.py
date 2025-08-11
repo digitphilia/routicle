@@ -115,12 +115,17 @@ class GraphEdge(GraphComponent):
     non-directional and have constraints (for e.g. cost, time, etc.)
     associated with it.
 
+    :ivar unode, vnode: The nodes ``u`` and ``v`` between which an
+        edge is connected. Follows the ``networkx`` nomenclature.
+
     :ivar label: The label of an edge in the graph. This is an
         optional value and can be anything - for example final weight,
         name of the edge etc. Child class may override the value as
         per need basis.
     """
 
+    unode : object = Field(..., description = "Node at Edge `u`")
+    vnode : object = Field(..., description = "Node at Edge `v`")
     label : Optional[str] = Field(None, description = "Display Label")
 
 
