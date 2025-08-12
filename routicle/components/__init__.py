@@ -11,4 +11,5 @@ abstract pydantic validator class.
 """
 
 from routicle.components import base # noqa: F401, F403
+from routicle.components import edges # noqa: F401, F403
 from routicle.components import nodes # noqa: F401, F403
