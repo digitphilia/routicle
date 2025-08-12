@@ -22,4 +22,4 @@ from routicle import utils # noqa: F401, F403
 from routicle import components # noqa: F401, F403
 
 # core components of routicle module
-from routicle.core import nx # noqa: F401, F403
+from routicle.core import networkx as nx # noqa: F401, F403

@@ -16,3 +16,4 @@ The module is implemented on an OOP approach, and all the base method
 and functions are defined under the ``base.py`` file.
 """
 
+from routicle.core.networkx.base import nxGraph # noqa: F401, F403

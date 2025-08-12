@@ -9,4 +9,4 @@ path, or inventory optimization by stock transfer or order planning
 for a location based on different sources.
 """
 
-from routicle.core import networkx as nx # noqa: F401, F403
+from routicle.core import networkx # noqa: F401, F403
