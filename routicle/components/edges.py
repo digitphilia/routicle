@@ -29,3 +29,10 @@ class TimeCostEdge(GraphEdge):
     @property
     def weight(self) -> float:
         return self.time * self.cost
+
+
+    @property
+    def attributes(self) -> dict:
+        return dict(
+            cost = self.cost, time = self.time, weight = self.weight
+        )
