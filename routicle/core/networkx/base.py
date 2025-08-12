@@ -22,7 +22,7 @@ class nxGraph(ABC):
 
         # ? The graph components from routicle
         self.dnodes = self.__set_dnodes__(G = self.G, nodes = dnodes)
-        self.dedges = self.__set_dedges__(G = self.G, nodes = dedges)
+        self.dedges = self.__set_dedges__(G = self.G, edges = dedges)
 
 
     def inspect(
