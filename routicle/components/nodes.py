@@ -9,6 +9,8 @@ defined. The attributes are typical constraints like supply/demand for
 a particular node type, for example a plant or an warehouse.
 """
 
+from pydantic import Field
+from typing import Optional
 from routicle.components.base import GraphNode
 
 class NTPorts(GraphNode):
@@ -72,6 +74,11 @@ class NTVendors(GraphNode):
     A vendor's lead time is most of the route specific so this must be
     defined as a weight (``edges`` attributes).
     """
+
+    reliability : Optional[float] = Field(
+        1.0,
+        description = "Vendor Reliability Score ∈ [0.0, 1.0]"
+    )
 
     @property
     def color(self) -> str:
