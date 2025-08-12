@@ -20,3 +20,6 @@ __version__ = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VER
 # init-time options registrations
 from routicle import utils # noqa: F401, F403
 from routicle import components # noqa: F401, F403
+
+# core components of routicle module
+from routicle.core import nx # noqa: F401, F403
