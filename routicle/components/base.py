@@ -8,9 +8,9 @@ the typical attributes and constraints of a component - like a node
 and an edge of a graph.
 """
 
-from typing import Optional
+from typing import List, Optional
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 class GraphComponent(BaseModel, ABC):
     """
@@ -82,6 +82,19 @@ class GraphNode(GraphComponent):
     # ? Minimum and Maximum Capacity of a Node
     mincapacity : float = 0.0
     maxcapacity : float = float("inf")
+
+
+    @model_validator(mode = "after")
+    def validate_capacity(self) -> object:
+        """
+        Assert if the Capacity are Justifiable
+        """
+
+        min_, max_ = self.mincapacity, self.maxcapacity
+        assert min_ <= max_, \
+            f"Min. Capacity ({min_:,.2f}) > Max. Capacity ({max_:,.2f})"
+        
+        return self
 
 
     def __init__(self, **attributes) -> None:
