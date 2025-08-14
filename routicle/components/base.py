@@ -64,6 +64,11 @@ class GraphNode(GraphComponent):
         applications one should always refer to the label attribute
         instead of the unique identity key.
 
+    :ivar image: A custom icon is not supported directly by the ``nx``
+        module, however once combined with ``gravis`` or ``matplotlib``
+        this is possible by setting an attribute or native functions.
+        The image is a typical attribute name for ``gravis`` module.
+
     :ivar mincapacity: The minimum capacity of a node. Typically, any
         supply chain and logistics entity has a capacity associated
         with it - for example plants, warehouses, etc. The minimum
@@ -78,6 +83,10 @@ class GraphNode(GraphComponent):
     """
 
     label : Optional[str] = Field(None, description = "Display Label")
+    image : Optional[str] = Field(
+        "../assets/icons/graph.png",
+        description = "Image Icon (png) for a Node"
+    )
 
     # ? Minimum and Maximum Capacity of a Node
     mincapacity : float = 0.0

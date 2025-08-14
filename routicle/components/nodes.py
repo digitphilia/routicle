@@ -23,6 +23,11 @@ class NTPorts(GraphNode):
     transported to/from another location.
     """
 
+    image : Optional[str] = Field(
+        "../assets/icons/cruise.png",
+        description = "Image Icon (png) for a Node:: PORT"
+    )
+
     @property
     def color(self) -> str:
         return "#FDE725"
@@ -38,6 +43,11 @@ class NTWarehouses(GraphNode):
     with only capacity constraint however other attributes maybe added
     in a future version.
     """
+
+    image : Optional[str] = Field(
+        "../assets/icons/warehouse.png",
+        description = "Image Icon (png) for a Node:: WAREHOUSE"
+    )
 
     @property
     def color(self) -> str:
@@ -58,6 +68,11 @@ class NTPlants(GraphNode):
         an inventory management problem.
     """
 
+    image : Optional[str] = Field(
+        "../assets/icons/conveyor.png",
+        description = "Image Icon (png) for a Node:: PLANT"
+    )
+
     rate : float
     demand : float
 
@@ -74,6 +89,11 @@ class NTVendors(GraphNode):
     A vendor's lead time is most of the route specific so this must be
     defined as a weight (``edges`` attributes).
     """
+
+    image : Optional[str] = Field(
+        "../assets/icons/vendor.png",
+        description = "Image Icon (png) for a Node:: VENDOR"
+    )
 
     reliability : Optional[float] = Field(
         1.0,
