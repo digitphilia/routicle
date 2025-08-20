@@ -17,3 +17,4 @@ and functions are defined under the ``base.py`` file.
 """
 
 from routicle.core.networkx.base import nxGraph # noqa: F401, F403
+from routicle.core.networkx.paths import PathAnalysis # noqa: F401, F403
