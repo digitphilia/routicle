@@ -6,7 +6,7 @@ A Set of Computations based on Paths of a NetworkX Graph
 
 from math import prod
 from itertools import pairwise
-from typing import Dict, Tuple, Iterable
+from typing import Dict, Tuple, Iterable, Callable
 
 import networkx as nx
 
@@ -69,7 +69,8 @@ class PathAnalysis(nxGraph):
         self,
         rtype : str = "complete",
         attribute : str = "weight",
-        calculate : str = "additive"
+        calculate : str = "multiplicative",
+        nxcostfunc : Callable = nx.dijkstra_path_length
     ) -> Iterable:
         """
         Check & Return All Simple Paths b/w Source and Target Node
@@ -90,8 +91,15 @@ class PathAnalysis(nxGraph):
         
         :type  calculate: str
         :param calculate: For a given path, the attribute can either
-            be "additive" (default) or "multiplicative" to get the
+            be "additive" or "multiplicative" (default) to get the
             total weight of the augmented path.
+
+        :type  nxcostfunc: function
+        :param nxcostfunc: A :mod:`networkx` cost calculation function
+            for an edge, defaults to :func:`nx.dijkstra_path_length`
+            function which takes :attr:`attribute` as weight value.
+            When the :attr:`calculate` is "additive" then value of
+            weight and costs are always same.
 
         The :attr:`rtype` argument is versatile in formatting the
         output into any one of the desired format. The iterable has
@@ -168,6 +176,19 @@ class PathAnalysis(nxGraph):
         allpaths["paths"]["weights"] = [
             sum(weight) if calculate == "additive" else prod(weight)
             for weight in allpaths["paths"]["weights"]
+        ]
+
+        allpaths["paths"]["costs"] = [
+            sum([
+                nxcostfunc(
+                self.G,
+                source = source,
+                target = target,
+                weight = attribute
+                )
+                for source, target in path
+            ])
+            for path in allpaths["paths"]["edges"]
         ]
 
         # remove edges, if rtype is nodes::
