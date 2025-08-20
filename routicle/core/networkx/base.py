@@ -12,6 +12,28 @@ import networkx as nx
 from routicle.components.base import GraphNode, GraphEdge
 
 class nxGraph(ABC):
+    """
+    NetworkX Graph Base Object for Routicle Module
+
+    An abstract base class is defined of :mod:`networkx` components
+    like Graph, nodes and edges definations for route optimization and
+    inventory management functions. The base function models all the
+    components into a standard format for analysis.
+
+    :ivar G: A :mod:`networkx.Graph` object which is valid and can be
+        any of the supported types - directed, multi-graph, etc.
+
+    :ivar dnodes: A dictionary of nodes of the graphs, where the key
+        is the label of the node and the node is any of the type of
+        node defined under :mod:`routicle.components` module. All the
+        additional attributes must be associated with the nodes for
+        any relevant calculations.
+
+    :ivar dedges: A dictionary of edges of the graph in the format of
+        (``u``, ``v``) as the dictionary key and edge is any of the
+        derived edge object from :mod:`routicle.components` module.
+    """
+
     def __init__(
         self,
         G : nx.Graph,
@@ -30,6 +52,38 @@ class nxGraph(ABC):
         label : str | Tuple[str, str],
         component : str = "node"
     ) -> GraphNode | GraphEdge:
+        """
+        Inspect the Graph and Return a Valid Object (if exists)
+
+        The graph can now be inspected by passing either a node label
+        or an edge tuple in the defined :attr:`dnode` or :attr:`dedge`
+        format and the function returns the underlying graph component
+        which is always a subclass of :attr:`routicle.components.base`
+        objects, else raises assertion error.
+
+        .. code-block:: python
+
+            import routicle.core.networkx as rnx
+
+            # generate a networkx graph and define nodes, edges
+            # and, create an rnx.nxGraph object with above details
+            graph = rnx.nxGraph(
+                G = G, dnodes = dnodes, dedges = dedges
+            )
+
+            # inspect a node from the graph::
+            print(graph.inspect("P0"))
+            >> cidx='a54834fb' label='P0' image=...
+
+            # inspect an edge from the graph::
+            print(graph.inspect(("V2", "L0"), component = "edge"))
+            >> cidx='898a8bca' unode=... vnode=...
+
+        The utility function is useful for quick inspection and lookup
+        of calculated attributes from an underlying derived edge like
+        :attr:`routicle.components.edges.TimeCostEdge` objects.
+        """
+
         component = component.lower()
         assert component in ["node", "edge"], \
             f"Component: {component} is not Valid."
