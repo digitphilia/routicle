@@ -150,10 +150,13 @@ class GraphEdge(GraphComponent):
     vnode : object = Field(..., description = "Node at Edge `v`")
     label : Optional[str] = Field(None, description = "Display Label")
 
+    # allow color to be edited from outside, set default as private
+    _color = "#191A1C"
+
 
     @property
     def color(self) -> str:
-        return "#191A1C"
+        return self._color
 
 
     @property
@@ -179,11 +182,39 @@ class GraphEdge(GraphComponent):
         scope of the class variable. Warning: This is a destructive
         function, and thus only certain attributes are allowed to be
         changed. Currently, only allowed are ``["color"]`` attributes.
+
+        Example Usage
+        -------------
+
+        The value of ``color`` attribute can be overwritten using the
+        private variable ``_color`` which is the internal private
+        attribute for the same.
+
+        .. code-block:: python
+
+            edge = GraphEdge(...)
+
+            print(edge.color) # get default value
+            >> #191A1C
+
+            edge._color = "#2F56A5" # ⚠️ note private variable use
+            print(edge.color) # get the update property value
+            >> #2F56A5
+
+            # or you can call the .__setattr__ method directly
+            edge.__setattr__(name = "_color", value = "#2F56A5")
+            >> ...
+
+            edge.label = "new value" # ❌ not allowed
+            >> ValueError ...
+
+        The :mod:`pydantic` models are immutable ``Frozen = True`` by
+        default, the private variable usage is used to override.
         """
 
-        allowed = ["color"] # only allow the defined
+        allowed = ["_color"] # only allow the defined
 
         if name not in allowed:
             raise ValueError(f"Attribute `{name}` is Immutable.")
 
-        return super().__setattr__(name, value)
+        return object.__setattr__(self, name, value)
