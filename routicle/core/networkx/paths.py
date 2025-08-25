@@ -309,10 +309,10 @@ class PathAnalysis(nxGraph):
             reverse = False if sense == 1 else True
         )
 
-        spaths = {
+        spaths = dict(paths = {
             k : [ vi for _, vi in sorted(zip(ordered, v)) ]
             for k, v in paths.items()
-        }
+        })
 
         # keep the dictionary structure as same as self.getpaths()
         spaths |= dict(source = self.source, target = self.target)
