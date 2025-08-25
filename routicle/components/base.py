@@ -8,7 +8,7 @@ the typical attributes and constraints of a component - like a node
 and an edge of a graph.
 """
 
-from typing import List, Optional
+from typing import Any, Optional
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, model_validator
 
@@ -169,3 +169,21 @@ class GraphEdge(GraphComponent):
         """
 
         pass
+
+
+    def __setattr__(self, name : str, value : Any) -> None:
+        """
+        Set/Override Attributes from Outside Scope of Class
+
+        Allow only certain attributes to be overriden from outside the
+        scope of the class variable. Warning: This is a destructive
+        function, and thus only certain attributes are allowed to be
+        changed. Currently, only allowed are ``["color"]`` attributes.
+        """
+
+        allowed = ["color"] # only allow the defined
+
+        if name not in allowed:
+            raise ValueError(f"Attribute `{name}` is Immutable.")
+
+        return super().__setattr__(name, value)
