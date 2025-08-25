@@ -204,6 +204,122 @@ class PathAnalysis(nxGraph):
         return allpaths
 
 
+    def sortedpaths(
+            self,
+            sense : int = 1,
+            cattribute : str = "costs",
+            **kwargs
+        ) -> dict:
+        """
+        Find & Report the K-th Path based on an Objective Function
+
+        The function finds a path based on an objective function which
+        is either a "minimization" :attr:`sense = 1` (default) or an
+        "maximization" :attr:`sense = -1` problem.
+
+        :type  sense: int
+        :param sense: Objective function, which is either a
+            minimization problem (``1``, default) or maximization
+            problem (:attr:`sense == -1`).
+
+        :type  cattribute: str
+        :param cattribute: Cost attribute to consider for calculation
+            and ordering of paths. The typical cost attributes are
+            "weights" and "costs" which have a different meaning.
+            
+        Keyword Arguments
+        -----------------
+
+        List of keyword arguments which are typical for the internal
+        :func:`getpaths` function.
+
+            * **attribute** (*str*) - Path attributes for calculation
+                of augmented path cost.
+
+            * **calculate** (*str*) - Calculation of attribute in the
+                desired format, i.e., sum or product mode.
+
+            * **nxcostfunc** (*callable*) - Cost function that is
+                using the internal :mod:`networkx` module.
+
+        For more information on the above keyword argument, check the
+        internal function documentation. All the values defaults to
+        the model function.
+
+        Example Usage(s)
+        ----------------
+
+        The function returns a sorted dictionary of paths which has
+        all the items from the :func:`getpaths()` to the sense defined
+        in the function.
+
+        .. code-block:: python
+
+            import routicle.core.networkx as rnx
+            ...
+
+            # define path analysis model from source to target
+            model = rnx.PathAnalysis(
+                G, dnodes = dnodes, dedges = dedges,
+                source = dnodes["V1"], target = dnodes["P4"]
+            )
+
+            # you can get the unordered all the paths, with costs like:
+            print(model.getpaths())
+
+            # or, get an ordered list which is a derived function:
+            print(model.sortedpaths())
+            >> ...
+
+            # pulp nomenclature, for maximizing the weights
+            print(model.sortedpaths(
+                cattribute = "weights", sense = -1
+            ))
+            >> ...
+
+        The function is customized as per business requirement, and
+        is always :mod:`pandas` compatible.
+        """
+
+        paths = self.getpaths(
+            attribute = kwargs.get("attribute", "weight"),
+            calculate = kwargs.get("calculate", "multiplicative"),
+            nxcostfunc = kwargs.get(
+                "nxcostfunc", nx.dijkstra_path_length
+            )
+        )["paths"]
+
+        n = len(paths[cattribute]) # raise key error, intentional
+        assert sense in [1, -1], "Unknow Value for Sense."
+
+        def sortkey(i : int) -> tuple:
+            """
+            A Sub-Function to Get an Ordered List
+
+            Get an ordered lists of length ``n`` as the length of the
+            attributes from paths in sorted order or user choice.
+            """
+
+            return (
+                paths[cattribute][i] is None, paths[cattribute][i]
+            )
+
+        ordered = sorted(
+            range(n), key = sortkey,
+            reverse = False if sense == 1 else True
+        )
+
+        spaths = {
+            k : [ vi for _, vi in sorted(zip(ordered, v)) ]
+            for k, v in paths.items()
+        }
+
+        # keep the dictionary structure as same as self.getpaths()
+        spaths |= dict(source = self.source, target = self.target)
+
+        return spaths
+
+
     def __set_path__(self, source : GraphNode, target : GraphNode):
         source, target = list(map(
             lambda x : x.label if isinstance(x, GraphNode) else x,
