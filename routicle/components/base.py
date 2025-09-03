@@ -12,27 +12,75 @@ from typing import Any, Optional
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, model_validator
 
-class GraphComponent(BaseModel, ABC):
+class BaseComponent(BaseModel, ABC):
     """
-    Abstract Base Class for a Graph Component
+    Abstract Base Validator Class for any Objective
 
-    The abstract base class of a graph component is inherited by all
-    the models - nodes and edges. The component defines the attributes
-    which is common and defines dunder methods which can be used to
-    print the attributes to console (typically for logging).
+    A base component is generic with any of the underlying environment
+    which can be accepted by the module. Check ``environ`` for more
+    details on setting up the environment for optimization.
 
-    :ivar cidx: An unique identity for the graph component. It is
+    :ivar name: A name for the component object, which can be anything
+        from ``label`` name in a :mod:`NetworkX` module or a variable
+        name under a :mod:`PuLP` module, etc.
+
+    :ivar cidx: An unique identity for the base component. It is
         recommended to create an identity with prefix "N" representing
         a node while an edge can be prefixed by "E" followed by any
-        number of characters. One can also use an unique identity
-        generator to define the name.
+        number of characters. When using a different type of solver,
+        you can prefix with "V" for variable, or skip. One can also
+        use an unique identity generator to define the name. Typically,
+        the unique identification key should only be used by a
+        developer or an adminitrator and must not be exposed to a
+        third party application or an API call.
 
-    **Note:** Typically, the unique identification key should only be
-    used by a developer or an adminitrator and must not be exposed to
-    a third party application or an API call.
+    :ivar environ: An unique identifier to modify or enable attributes
+        based on the available environment. The environment can be any
+        one of the supported modules for optimization and all the
+        attributes and functions are modeled accordingly.
+
+            * **nx** : An interface for the :mod:`networkx` module and
+              all the modules are configured as :attr:`attribute` for
+              easy integration.
+
+            * **p.variable** : A type of :mod:`pulp` which is always
+              of type ``p.LpVariable(...)`` object.
+
+    Code Example(s)
+    ---------------
+
+    A component is defined such that any object is always an instance
+    of the ``BaseComponent`` thus any object can be defined like:
+
+    .. code-block:: python
+
+        import routicle.components as components
+        
+        # let's define a graph component using networkx
+        class GraphNode(components.base.BaseComponent):
+            ...
+
+            @property
+            def environ(self) -> str:
+                return "nx"
+
+        node = GraphNode(name = "N001", ...)
+
+        # a typical attributes like ``label`` or ``attributes`` are
+        # made available through underlying properties explicit
+        print(node.label)
+        >> ... # this may be same as ``name`` or ``cidx``
+
+    Any component has any defined constraints, requirements, etc. are
+    always defined from base component objects, while an environment
+    and related attributes should be modeled accordingly.
     """
 
+    name : str = Field(..., description = "Name of the Component")
     cidx : Optional[str] = Field(..., description = "Unique Identity")
+
+    # environment selection component, required
+    environ = str = Field(..., description = f"Any of Accepted Value")
 
 
     @property
@@ -48,6 +96,27 @@ class GraphComponent(BaseModel, ABC):
         """
 
         pass
+
+
+    @property
+    def available_environ(self) -> tuple:
+        """
+        A Tuple of Valid Values for the Environment
+        """
+
+        return ("nx", "p.variable")
+
+
+    @model_validator(mode = "after")
+    def validate_environ(self) -> object:
+        """
+        Validate the Environment Attribute from a Valid Tuple
+        """
+
+        assert self.environ in self.available_environ, \
+            f"Environment is Not Valid."
+        
+        return self
 
 
 class GraphNode(GraphComponent):
