@@ -84,21 +84,6 @@ class BaseComponent(BaseModel, ABC):
 
 
     @property
-    @abstractmethod
-    def color(self) -> str:
-        """
-        Define Color (for HTML/front end) for a Graph Component
-
-        We've used ``networkx`` and ``gravis`` to plot the graph for
-        visualization. This is an optional property whose default value
-        must be set in the ``node`` and ``edge`` component and can be
-        extended to other child classes overriding the value.
-        """
-
-        pass
-
-
-    @property
     def available_environ(self) -> tuple:
         """
         A Tuple of Valid Values for the Environment
@@ -119,39 +104,43 @@ class BaseComponent(BaseModel, ABC):
         return self
 
 
-class GraphNode(GraphComponent):
+class PointOfInterest(BaseComponent):
     """
-    Abstract Class Defination of a Node
+    Abstract Class Defination of a "Point of Interest" (Node of Graph)
 
     In graph theory, a node, also known as a "vertex", is a fundamental
-    unitthat represents an entity or object within the graph. Nodes are
+    unit that represents an entity or object within the graph. Nodes are
     connected to each other by edges, forming the structure of a graph.
 
-    :ivar label: Display label of a node. The node label can be the
-        same as the ``cidx`` i.e., the component identity key, or can
-        be a custom one based on user preference. For any external
-        applications one should always refer to the label attribute
-        instead of the unique identity key.
+    In a optimization problem, a "Graph Node" can be considered as a
+    variable which is subjected to a constraint.
 
     :ivar image: A custom icon is not supported directly by the ``nx``
         module, however once combined with ``gravis`` or ``matplotlib``
         this is possible by setting an attribute or native functions.
         The image is a typical attribute name for ``gravis`` module.
 
+    Supply Chain Attributes
+    -----------------------
+
+    The following attributes and properties are defined which are
+    typical to a supply chain problem. Each property has an associated
+    default value meaning the variable is unconstrained.
+
     :ivar mincapacity: The minimum capacity of a node. Typically, any
         supply chain and logistics entity has a capacity associated
         with it - for example plants, warehouses, etc. The minimum
         capacity can be derived from additional models for maintenance
-        of norms or minimum stock.
+        of norms or minimum stock. The minimum capacity should be
+        treated as ``lowBound`` when using :mod:`PuLP` variable.
 
     :ivar maxcapacity: The maximum capacity of an entity, defaults to
-        infinity.
-    
-    **Note:** The capacity should always be in a standard unit or the
-    same should be maintained throughout.
+        infinity. The maximum capacity can be fetched from an external
+        model to populate, or static data should be defined. The
+        maximum capacity should be treated as ``upBound`` when using
+        :mod:`PuLP` variable.
     """
 
-    label : Optional[str] = Field(None, description = "Display Label")
     image : Optional[str] = Field(
         "../assets/icons/graph.png",
         description = "Image Icon (png) for a Node"
@@ -175,17 +164,22 @@ class GraphNode(GraphComponent):
         return self
 
 
-    def __init__(self, **attributes) -> None:
-        attributes["label"] = attributes.get(
-            "label",
-            attributes["cidx"]
-        )
-
-        super().__init__(**attributes)
-
-
     @property
     def color(self) -> str:
+        """
+        Define Color (for HTML/front end) for a Graph Component
+
+        We've used ``networkx`` and ``gravis`` to plot the graph for
+        visualization. This is an optional property whose default value
+        must be set in the ``node`` and ``edge`` component and can be
+        extended to other child classes overriding the value.
+
+        However, the property does not have any meaning if using a
+        optimization module like :mod:`PuLP` or :mod:`pyomo` etc. The
+        property is shifted under the ``PointOfInterest`` class rather
+        than being a requirement.
+        """
+
         return "#42B3E3"
 
 
@@ -193,7 +187,7 @@ class GraphNode(GraphComponent):
     def attributes(self) -> dict:
         return {
             k : v for k, v in vars(self).items()
-            if k not in ["cidx", "label"] # discarded keys
+            if k not in ["cidx", "name", "environ"] # discarded keys
         }
 
 
