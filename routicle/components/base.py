@@ -154,17 +154,23 @@ class PointOfInterest(BaseComponent):
         }
 
 
-class GraphEdge(GraphComponent):
+class POIConnector(BaseComponent):
     """
-    Abstract Class Defination of a Edge
+    Abstract Class Defination of a "POI Connectors" (Edge of Graph)
 
     An edge, in Graph Theory, is a fundamental component which connects
     two vertices (or "nodes") of a graph. A edge can be directional or
     non-directional and have constraints (for e.g. cost, time, etc.)
     associated with it.
 
+    In contrast, a connector may be considered as a constraint based
+    on two different points which is typically required for any
+    optimization problems. Typical attributes can be ``cost``,
+    ``time``, etc. which is subjected to a constraints.
+
     :ivar unode, vnode: The nodes ``u`` and ``v`` between which an
-        edge is connected. Follows the ``networkx`` nomenclature.
+        edge is connected. Follows the ``networkx`` nomenclature. This
+        only establishes a relationship.
 
     :ivar label: The label of an edge in the graph. This is an
         optional value and can be anything - for example final weight,
@@ -174,7 +180,6 @@ class GraphEdge(GraphComponent):
 
     unode : object = Field(..., description = "Node at Edge `u`")
     vnode : object = Field(..., description = "Node at Edge `v`")
-    label : Optional[str] = Field(None, description = "Display Label")
 
     # allow color to be edited from outside, set default as private
     _color = "#191A1C"
@@ -182,6 +187,19 @@ class GraphEdge(GraphComponent):
 
     @property
     def color(self) -> str:
+        """
+        Define Color (for HTML/front end) for a Graph Component
+
+        The color attribute can be changed externally, this let the
+        front end to be updated and highlight the path which satisfy
+        the underlying constraints. For example, the calculated
+        shortest path can be highlighted with a different color.
+
+        The color attribute is typical for ``netwrokx`` and ``gravis``
+        and thus a default value is created, such that there is no
+        redundant overhead to the end-user application interface.
+        """
+
         return self._color
 
 
