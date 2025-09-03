@@ -80,7 +80,7 @@ class BaseComponent(BaseModel, ABC):
     cidx : Optional[str] = Field(..., description = "Unique Identity")
 
     # environment selection component, required
-    environ = str = Field(..., description = f"Any of Accepted Value")
+    environ : str = Field(..., description = f"Any of Accepted Value")
 
 
     @property
