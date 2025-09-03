@@ -34,18 +34,6 @@ class BaseComponent(BaseModel, ABC):
         developer or an adminitrator and must not be exposed to a
         third party application or an API call.
 
-    :ivar environ: An unique identifier to modify or enable attributes
-        based on the available environment. The environment can be any
-        one of the supported modules for optimization and all the
-        attributes and functions are modeled accordingly.
-
-            * **nx** : An interface for the :mod:`networkx` module and
-              all the modules are configured as :attr:`attribute` for
-              easy integration.
-
-            * **p.variable** : A type of :mod:`pulp` which is always
-              of type ``p.LpVariable(...)`` object.
-
     Code Example(s)
     ---------------
 
@@ -78,31 +66,6 @@ class BaseComponent(BaseModel, ABC):
 
     name : str = Field(..., description = "Name of the Component")
     cidx : Optional[str] = Field(..., description = "Unique Identity")
-
-    # environment selection component, required
-    environ : str = Field(..., description = f"Any of Accepted Value")
-
-
-    @property
-    def available_environ(self) -> tuple:
-        """
-        A Tuple of Valid Values for the Environment
-        """
-
-        return ("nx", "p.variable")
-
-
-    @model_validator(mode = "after")
-    def validate_environ(self) -> object:
-        """
-        Validate the Environment Attribute from a Valid Tuple
-        """
-
-        assert self.environ in self.available_environ, \
-            f"Environment is Not Valid."
-        
-        return self
-
 
 class PointOfInterest(BaseComponent):
     """
