@@ -10,79 +10,106 @@ and an edge of a graph.
 
 from typing import Any, Optional
 from abc import ABC, abstractmethod
+
 from pydantic import BaseModel, Field, model_validator
 
-class GraphComponent(BaseModel, ABC):
+class BaseComponent(BaseModel, ABC):
     """
-    Abstract Base Class for a Graph Component
+    Abstract Base Validator Class for any Objective
 
-    The abstract base class of a graph component is inherited by all
-    the models - nodes and edges. The component defines the attributes
-    which is common and defines dunder methods which can be used to
-    print the attributes to console (typically for logging).
+    A base component is generic with any of the underlying environment
+    which can be accepted by the module. Check ``environ`` for more
+    details on setting up the environment for optimization.
 
-    :ivar cidx: An unique identity for the graph component. It is
+    :ivar name: A name for the component object, which can be anything
+        from ``label`` name in a :mod:`NetworkX` module or a variable
+        name under a :mod:`PuLP` module, etc.
+
+    :ivar cidx: An unique identity for the base component. It is
         recommended to create an identity with prefix "N" representing
         a node while an edge can be prefixed by "E" followed by any
-        number of characters. One can also use an unique identity
-        generator to define the name.
+        number of characters. When using a different type of solver,
+        you can prefix with "V" for variable, or skip. One can also
+        use an unique identity generator to define the name. Typically,
+        the unique identification key should only be used by a
+        developer or an adminitrator and must not be exposed to a
+        third party application or an API call.
 
-    **Note:** Typically, the unique identification key should only be
-    used by a developer or an adminitrator and must not be exposed to
-    a third party application or an API call.
+    Code Example(s)
+    ---------------
+
+    A component is defined such that any object is always an instance
+    of the ``BaseComponent`` thus any object can be defined like:
+
+    .. code-block:: python
+
+        import routicle.components as components
+        
+        # let's define a graph component using networkx
+        class GraphNode(components.base.BaseComponent):
+            ...
+
+            @property
+            def environ(self) -> str:
+                return "nx"
+
+        node = GraphNode(name = "N001", ...)
+
+        # a typical attributes like ``label`` or ``attributes`` are
+        # made available through underlying properties explicit, this
+        # is set to the universal attribute "name" for the nodes.
+        print(node.name)
+        >> ... # this may be same as ``name`` or ``cidx``
+
+    Any component has any defined constraints, requirements, etc. are
+    always defined from base component objects, while an environment
+    and related attributes should be modeled accordingly.
     """
 
+    name : str = Field(..., description = "Name of the Component")
     cidx : Optional[str] = Field(..., description = "Unique Identity")
 
-
-    @property
-    @abstractmethod
-    def color(self) -> str:
-        """
-        Define Color (for HTML/front end) for a Graph Component
-
-        We've used ``networkx`` and ``gravis`` to plot the graph for
-        visualization. This is an optional property whose default value
-        must be set in the ``node`` and ``edge`` component and can be
-        extended to other child classes overriding the value.
-        """
-
-        pass
-
-
-class GraphNode(GraphComponent):
+class PointOfInterest(BaseComponent):
     """
-    Abstract Class Defination of a Node
+    Abstract Class Defination of a "Point of Interest" (Node of Graph)
 
     In graph theory, a node, also known as a "vertex", is a fundamental
-    unitthat represents an entity or object within the graph. Nodes are
+    unit that represents an entity or object within the graph. Nodes are
     connected to each other by edges, forming the structure of a graph.
 
-    :ivar label: Display label of a node. The node label can be the
-        same as the ``cidx`` i.e., the component identity key, or can
-        be a custom one based on user preference. For any external
-        applications one should always refer to the label attribute
-        instead of the unique identity key.
+    In a optimization problem, a "Graph Node" can be considered as a
+    variable which is subjected to a constraint.
 
     :ivar image: A custom icon is not supported directly by the ``nx``
         module, however once combined with ``gravis`` or ``matplotlib``
         this is possible by setting an attribute or native functions.
         The image is a typical attribute name for ``gravis`` module.
 
+    Supply Chain Attributes
+    -----------------------
+
+    The following attributes and properties are defined which are
+    typical to a supply chain problem. Each property has an associated
+    default value meaning the variable is unconstrained.
+
     :ivar mincapacity: The minimum capacity of a node. Typically, any
         supply chain and logistics entity has a capacity associated
         with it - for example plants, warehouses, etc. The minimum
         capacity can be derived from additional models for maintenance
-        of norms or minimum stock.
+        of norms or minimum stock. The minimum capacity should be
+        treated as ``lowBound`` when using :mod:`PuLP` variable.
 
     :ivar maxcapacity: The maximum capacity of an entity, defaults to
-        infinity.
+        infinity. The maximum capacity can be fetched from an external
+        model to populate, or static data should be defined. The
+        maximum capacity should be treated as ``upBound`` when using
+        :mod:`PuLP` variable.
     
-    **Note:** The capacity should always be in a standard unit or the
-    same should be maintained throughout.
+    It is recommended not to use the base class directly. Any derived
+    class defined under :mod:`routicle.components.nodes` are sub-class
+    of point of interest (nodes) and can be referenced.
     """
 
-    label : Optional[str] = Field(None, description = "Display Label")
     image : Optional[str] = Field(
         "../assets/icons/graph.png",
         description = "Image Icon (png) for a Node"
@@ -106,17 +133,22 @@ class GraphNode(GraphComponent):
         return self
 
 
-    def __init__(self, **attributes) -> None:
-        attributes["label"] = attributes.get(
-            "label",
-            attributes["cidx"]
-        )
-
-        super().__init__(**attributes)
-
-
     @property
     def color(self) -> str:
+        """
+        Define Color (for HTML/front end) for a Graph Component
+
+        We've used ``networkx`` and ``gravis`` to plot the graph for
+        visualization. This is an optional property whose default value
+        must be set in the ``node`` and ``edge`` component and can be
+        extended to other child classes overriding the value.
+
+        However, the property does not have any meaning if using a
+        optimization module like :mod:`PuLP` or :mod:`pyomo` etc. The
+        property is shifted under the ``PointOfInterest`` class rather
+        than being a requirement.
+        """
+
         return "#42B3E3"
 
 
@@ -124,31 +156,37 @@ class GraphNode(GraphComponent):
     def attributes(self) -> dict:
         return {
             k : v for k, v in vars(self).items()
-            if k not in ["cidx", "label"] # discarded keys
+            if k not in ["cidx", "name"] # discarded keys
         }
 
 
-class GraphEdge(GraphComponent):
+class POIConnector(BaseComponent):
     """
-    Abstract Class Defination of a Edge
+    Abstract Class Defination of a "POI Connectors" (Edge of Graph)
 
     An edge, in Graph Theory, is a fundamental component which connects
     two vertices (or "nodes") of a graph. A edge can be directional or
     non-directional and have constraints (for e.g. cost, time, etc.)
     associated with it.
 
-    :ivar unode, vnode: The nodes ``u`` and ``v`` between which an
-        edge is connected. Follows the ``networkx`` nomenclature.
+    In contrast, a connector may be considered as a constraint based
+    on two different points which is typically required for any
+    optimization problems. Typical attributes can be ``cost``,
+    ``time``, etc. which is subjected to a constraints.
 
-    :ivar label: The label of an edge in the graph. This is an
-        optional value and can be anything - for example final weight,
-        name of the edge etc. Child class may override the value as
-        per need basis.
+    :ivar unode, vnode: The nodes ``u`` and ``v`` between which an
+        edge is connected. Follows the ``networkx`` nomenclature. This
+        only establishes a relationship. Both the object ``u`` and
+        ``v`` must be an instance of :class:`PointOfInterest` and not
+        the base class as they must be a node.
     """
 
-    unode : object = Field(..., description = "Node at Edge `u`")
-    vnode : object = Field(..., description = "Node at Edge `v`")
-    label : Optional[str] = Field(None, description = "Display Label")
+    unode : PointOfInterest = Field(
+        ..., description = "Node at Edge `u`"
+    )
+    vnode : PointOfInterest = Field(
+        ..., description = "Node at Edge `v`"
+    )
 
     # allow color to be edited from outside, set default as private
     _color = "#191A1C"
@@ -156,6 +194,19 @@ class GraphEdge(GraphComponent):
 
     @property
     def color(self) -> str:
+        """
+        Define Color (for HTML/front end) for a Graph Component
+
+        The color attribute can be changed externally, this let the
+        front end to be updated and highlight the path which satisfy
+        the underlying constraints. For example, the calculated
+        shortest path can be highlighted with a different color.
+
+        The color attribute is typical for ``netwrokx`` and ``gravis``
+        and thus a default value is created, such that there is no
+        redundant overhead to the end-user application interface.
+        """
+
         return self._color
 
 

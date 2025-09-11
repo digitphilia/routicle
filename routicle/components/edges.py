@@ -4,11 +4,11 @@
 Defination of a Edges Attributes for a Gaph
 """
 
-from routicle.components.base import GraphEdge
+from routicle.components.base import POIConnector
 
-class TimeCostEdge(GraphEdge):
+class TimeCostEdge(POIConnector):
     """
-    An Edge with a Time & Cost Parameter
+    An Edge (connection b/w nodes) with a Time & Cost Parameter
 
     The two most common type of weights associated with a supply chain
     and logistics problem are (I) by when, and (II) at what cost. The
