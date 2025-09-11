@@ -150,7 +150,7 @@ class PointOfInterest(BaseComponent):
     def attributes(self) -> dict:
         return {
             k : v for k, v in vars(self).items()
-            if k not in ["cidx", "name", "environ"] # discarded keys
+            if k not in ["cidx", "name"] # discarded keys
         }
 
 
