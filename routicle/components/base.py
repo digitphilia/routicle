@@ -55,8 +55,9 @@ class BaseComponent(BaseModel, ABC):
         node = GraphNode(name = "N001", ...)
 
         # a typical attributes like ``label`` or ``attributes`` are
-        # made available through underlying properties explicit
-        print(node.label)
+        # made available through underlying properties explicit, this
+        # is set to the universal attribute "name" for the nodes.
+        print(node.name)
         >> ... # this may be same as ``name`` or ``cidx``
 
     Any component has any defined constraints, requirements, etc. are
@@ -170,16 +171,17 @@ class POIConnector(BaseComponent):
 
     :ivar unode, vnode: The nodes ``u`` and ``v`` between which an
         edge is connected. Follows the ``networkx`` nomenclature. This
-        only establishes a relationship.
-
-    :ivar label: The label of an edge in the graph. This is an
-        optional value and can be anything - for example final weight,
-        name of the edge etc. Child class may override the value as
-        per need basis.
+        only establishes a relationship. Both the object ``u`` and
+        ``v`` must be an instance of :class:`PointOfInterest` and not
+        the base class as they must be a node.
     """
 
-    unode : object = Field(..., description = "Node at Edge `u`")
-    vnode : object = Field(..., description = "Node at Edge `v`")
+    unode : PointOfInterest = Field(
+        ..., description = "Node at Edge `u`"
+    )
+    vnode : PointOfInterest = Field(
+        ..., description = "Node at Edge `v`"
+    )
 
     # allow color to be edited from outside, set default as private
     _color = "#191A1C"
