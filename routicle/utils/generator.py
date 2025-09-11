@@ -43,28 +43,11 @@ def create_nodes(
     Additional optional controls of the function can be done through
     the use of the following keyword arguments.
 
-        * **uselabels** (*bool*): A node has an unique identity which
-            defaults to ``uuid.uuid4`` and a display label in the
-            graph. By default, if a label is not defined then it is
-            the same as the unique identity. On setting the value to
-            ``True`` the unique identity and the label is generated
-            as ``{N001, N002, ...}`` else, the label is same, while
-            the unique identity is a ``uuid.uuid4`` string object.
-            Defaults to True.
-
-        * **genindex** (*bool*): By default, if an attribute is passed,
-            then the function expects all the default attributes to be
-            defined. However, we give the privilege to generate the
-            unique identity of the attribute by passing partial values.
-            Defaults to False.
-
-        * **genlabel** (*bool*): Like ``genindex`` generate the label
-            if partial list is passed. Default to False.
-
-        * **ovindex** (*bool*): Overwrite index value with the passed
-            label value - this can be useful when a partial attribute
-            is passed and ``genindex == False`` is defined. Defaults
-            to False.
+        * **namegen** (*callable*): A callable function to generate
+          the attribute ``name`` for each of the node. Defaults to the
+          string formatter ``f"{prefix}{str(idx).zfill(len(str(n)))}"``
+          where ``idx`` is ``range(n)`` and is formatted to be of same
+          size by using ``.zfill(...)`` function.
 
     Example Usage(s)
     ----------------
@@ -93,27 +76,15 @@ def create_nodes(
     attributes = attributes if attributes else [dict()] * n
     
     # ? Keyword arguments defination with defaults
-    uselabels = kwargs.get("uselabels", True)
-
-    genindex = kwargs.get("genindex", False)
-    genlabel = kwargs.get("genlabel", False)
-
-    ovindex = kwargs.get("ovindex", False)
+    namegen = kwargs.get(
+        "namegen",
+        lambda pre, idx, n : f"{pre}{str(idx).zfill(len(str(n)))}"
+    )
 
     # generator: use `next()` or `list(...)`
     for idx in range(n):
         attribute = attributes[idx] # current attribute
 
-        # ? Label Attribute:: Generate or Use Defaults
-        _label = f"{prefix}{str(idx).zfill(len(str(n)))}"
-        _label = _label if genlabel else attribute.get("label", None)
-
-        # ? Unique Identity Attribute:: Generate or Override
-        _cidx = attribute["label"] if uselabels or ovindex else \
-            str(UUIDx()) if genindex else attribute.get("cidx", None)
-
-        # ? Overwrite or define the labels from the above vars
-        attribute["cidx"] = _cidx
-        attribute["label"] = _label
-
+        # ? Name Attribute:: Generate using a Callable Function
+        attribute["name"] = namegen(prefix, idx, n)
         yield ntype(**attribute)

@@ -67,7 +67,7 @@ class BaseComponent(BaseModel, ABC):
     """
 
     name : str = Field(..., description = "Name of the Component")
-    cidx : Optional[str] = Field(..., description = "Unique Identity")
+    cidx : Optional[str] = Field(None, description = "Unique Identity")
 
 class PointOfInterest(BaseComponent):
     """

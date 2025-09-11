@@ -11,7 +11,7 @@ from typing import Dict, Tuple, Iterable, Callable
 import networkx as nx
 
 from routicle.core.networkx.base import nxGraph
-from routicle.components.base import GraphNode, GraphEdge
+from routicle.components.base import PointOfInterest, POIConnector
 
 class PathAnalysis(nxGraph):
     """
@@ -22,10 +22,10 @@ class PathAnalysis(nxGraph):
     heavily dependent on the :mod:`networkx` module and typically
     returns an interable of paths for further analysis.
 
-    :ivar source, target: Source and target node label or the node
-        object of :mod:`routicle.components.base.GraphNode` instance.
-        Both the values cannot be None, and analysis is done on the
-        available nodes.
+    :ivar source, target: Source and target node name or the node
+        object of :mod:`routicle.components.base.PointOfInterest`
+        instance. Both the values cannot be None, and analysis is done
+        on the available nodes.
 
     Note: Simple wrapper of :mod:`networkx` module are not available,
     and it is recommended to directly use those functions unless the
@@ -37,7 +37,7 @@ class PathAnalysis(nxGraph):
         import routicle.core.networkx as rnx
 
         # create a model for path analysis from graph
-        # source and target can be label or GraphNode instances
+        # source and target can be name or PointOfInterest instances
         model = PathAnalysis(
             G = G, dnodes = dnodes, dedges = dedges,
             source = "V1", target = dnodes["P4"]
@@ -56,10 +56,10 @@ class PathAnalysis(nxGraph):
     def __init__(
         self,
         G : nx.Graph,
-        dnodes : Dict[str, GraphNode],
-        dedges : Dict[Tuple[str, str], GraphEdge],
-        source : GraphNode | str = None,
-        target : GraphEdge | str = None
+        dnodes : Dict[str, PointOfInterest],
+        dedges : Dict[Tuple[str, str], POIConnector],
+        source : PointOfInterest | str = None,
+        target : PointOfInterest | str = None
     ) -> None:
         super().__init__(G = G, dnodes = dnodes, dedges = dedges)
         self.source, self.target = self.__set_path__(source, target)
@@ -320,9 +320,13 @@ class PathAnalysis(nxGraph):
         return spaths
 
 
-    def __set_path__(self, source : GraphNode, target : GraphNode):
+    def __set_path__(
+            self,
+            source : PointOfInterest,
+            target : PointOfInterest
+        ):
         source, target = list(map(
-            lambda x : x.label if isinstance(x, GraphNode) else x,
+            lambda x : x.name if isinstance(x, PointOfInterest) else x,
             [source, target]
         ))
 
