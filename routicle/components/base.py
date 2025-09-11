@@ -11,7 +11,7 @@ and an edge of a graph.
 from typing import Any, Optional
 from abc import ABC, abstractmethod
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 class BaseComponent(BaseModel, ABC):
     """
@@ -105,12 +105,10 @@ class PointOfInterest(BaseComponent):
         maximum capacity should be treated as ``upBound`` when using
         :mod:`PuLP` variable.
     
-    The base class is designed to be generic and allow any extra
-    attributes can be set as the class attribute as allowed by other
-    external modules.
+    It is recommended not to use the base class directly. Any derived
+    class defined under :mod:`routicle.components.nodes` are sub-class
+    of point of interest (nodes) and can be referenced.
     """
-
-    model_config = ConfigDict(extra = "allow")
 
     image : Optional[str] = Field(
         "../assets/icons/graph.png",
