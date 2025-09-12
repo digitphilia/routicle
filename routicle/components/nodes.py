@@ -9,8 +9,10 @@ defined. The attributes are typical constraints like supply/demand for
 a particular node type, for example a plant or an warehouse.
 """
 
+import warnings
+
 from typing import Optional
-from pydantic import Field, ConfigDict
+from pydantic import Field, ConfigDict, model_validator
 
 from routicle.components.base import PointOfInterest
 
@@ -97,9 +99,24 @@ class SupplyPoints(PointOfInterest):
     to a manufacturing unit for conversion or may supply finished goods
     (P2P materials) to delivery locations for selling.
 
+    :ivar moq: Minimum order quantity for a supplier, which is the
+        value that must be given if placing an order else 0. The value
+        defaults to 0. The constrained is a parallel logic as below:
+        ``OR(quantity = 0, quantity >= moq)`` for the supplier.
+
+    :ivar packsize: A pack size of the supplier, which is a multiple
+        value (typically for material dispatched in a bag, tanker,
+        etc.). The value must be an multiple of :attr:`moq` else an
+        warning is raised and the solution might be infeasible.
+
     :ivar reliability: A weightage ∈ [0, 1] to determine efficiency of
         a supplying point in terms of historic performance. A score
         should be supplied, defaults to 1.0 (maximum) value.
+
+    :ivar minorder: Typically for a strategic supplier, a quantity
+        must be given to the vendor. This is an optional control, which
+        also reduces the risk of single source issue. Defaults to 0,
+        unconstrined (this is different from MOQ).
 
     In addition, any type of additional attributes are allowed to be
     passed for further calculations and enhancements.
@@ -112,11 +129,41 @@ class SupplyPoints(PointOfInterest):
         description = "Image Icon (png) for a Node:: VENDOR"
     )
 
+    moq : float = Field(0.0, description = "Minimum Order Quantity")
+    packsize : float = Field(1.0, description = "Pack Size of Supplier")
+
     reliability : Optional[float] = Field(
         1.0,
         description = "Reliability Score ∈ [0.0, 1.0]"
     )
 
+    minorder : Optional[float] = Field(
+        0.0,
+        description = "A Value that Must be Assigned to the Supplier"
+    )
+
     @property
     def color(self) -> str:
         return "#440154"
+
+
+    @model_validator(mode = "after")
+    def validate_config(self) -> object:
+        """
+        Assert/Raise Warning for the Configuration of the Supply Point
+        """
+
+        mincapacity = self.mincapacity # from parent class
+        moq, ps, mo = self.moq, self.packsize, self.minorder
+
+        assert ps > 0.0, "Pack Size <= 0.0, Not Possible"
+        assert moq >= mo, "Min. Order Quantity <= Min. Order"
+        assert mincapacity >= mo, "Min. Capacity <= Min. Order"
+
+        if moq % ps != 0:
+            warnings.warn("Pack Size is not a Multiple of MOQ")
+
+        if mincapacity > 0.0:
+            warnings.warn("Min. Capacity is defined at Supply Point")
+
+        raise self
