@@ -151,14 +151,37 @@ class SupplyPoints(PointOfInterest):
     def validate_config(self) -> object:
         """
         Assert/Raise Warning for the Configuration of the Supply Point
+
+        Validate the configuration of the supplying points (nodes) for
+        each, as below:
+
+            1. A supply point cannot have a zero pack size, default
+              multiple is one, which must be provided else an assertion
+              error is raised.
+
+            2. If MOQ is defined, then minimum order must be greater
+              than or equal to MOQ value, else an infeasible solution
+              will always be created.
+
+        In addition to the assertion checks, the function also raises
+        the following warnings:
+
+            1. Minimum capacity of a supply point typically does not
+              have any meaning, thus an warning is raised.
+
+            2. Pack size must be a multiple of MOQ, else an warning is
+              raised. This might give an infeasible solution, or to
+              satisfy the demand, a vendor may be given more quantity
+              just to find and meet the pack size constraint.
         """
 
         mincapacity = self.mincapacity # from parent class
         moq, ps, mo = self.moq, self.packsize, self.minorder
 
         assert ps > 0.0, "Pack Size <= 0.0, Not Possible"
-        assert moq >= mo, "Min. Order Quantity <= Min. Order"
-        assert mincapacity >= mo, "Min. Capacity <= Min. Order"
+
+        assert ((moq > 0.0) and (moq >= mo)) or (moq == 0.0), \
+            "Min. Order Quantity (MOQ) is defined, but MOQ < Min. Order"
 
         if moq % ps != 0:
             warnings.warn("Pack Size is not a Multiple of MOQ")
@@ -166,4 +189,11 @@ class SupplyPoints(PointOfInterest):
         if mincapacity > 0.0:
             warnings.warn("Min. Capacity is defined at Supply Point")
 
-        raise self
+        if mo > 0.0 and moq > 0.0 and mo <= moq:
+            warnings.warn(
+                f"Possible Conflict b/w MOQ (= {moq}); defined, but" \
+                + f" Min. Order Value (= {mo}) is a Lower Value. " \
+                + f"i.e., Constraint is $(x >= {moq}) & (x >= {mo})$"
+            )
+
+        return self
