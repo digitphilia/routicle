@@ -175,13 +175,16 @@ class SupplyPoints(PointOfInterest):
               just to find and meet the pack size constraint.
         """
 
+        selfname = f"ON OBJECT :: {self.name}" # verbose
         mincapacity = self.mincapacity # from parent class
         moq, ps, mo = self.moq, self.packsize, self.minorder
 
-        assert ps > 0.0, "Pack Size <= 0.0, Not Possible"
+        assert ps > 0.0, \
+            f"{selfname} - Pack Size <= 0.0, Not Possible"
 
         assert ((moq > 0.0) and (moq >= mo)) or (moq == 0.0), \
-            "Min. Order Quantity (MOQ) is defined, but MOQ < Min. Order"
+            f"{selfname} - Min. Order Quantity (MOQ = {moq}) "\
+            + f"is defined, but MOQ < Min. Order {mo}"
 
         if moq % ps != 0:
             warnings.warn("Pack Size is not a Multiple of MOQ")
@@ -189,7 +192,7 @@ class SupplyPoints(PointOfInterest):
         if mincapacity > 0.0:
             warnings.warn("Min. Capacity is defined at Supply Point")
 
-        if mo > 0.0 and moq > 0.0 and mo <= moq:
+        if mo > 0.0 and moq > 0.0 and mo < moq:
             warnings.warn(
                 f"Possible Conflict b/w MOQ (= {moq}); defined, but" \
                 + f" Min. Order Value (= {mo}) is a Lower Value. " \
