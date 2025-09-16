@@ -129,6 +129,23 @@ class nxGraph(ABC):
         return di[name] # value assertion on initialization
 
 
+    def getbycidx(
+            self,
+            cidx : str,
+            component : str = "node"
+        ) -> PointOfInterest | POIConnector:
+        """
+        Get the Node/Edge Element from the CIDX Attribute
+        """
+
+        component = component.lower()
+        assert component in ["node", "edge"], \
+            f"Component: {component} is not Valid."
+
+        di = self.dnodes if component == "node" else self.dedges
+        return [comp for comp in di.values() if comp.cidx == cidx][0]
+
+
     def __set_dnodes__(
         self,
         G : nx.Graph,
