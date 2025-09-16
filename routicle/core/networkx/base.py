@@ -6,6 +6,7 @@ An Abstract Base Method for Routicle Optimization
 
 from abc import ABC
 from typing import Dict, Tuple
+from tqdm.auto import tqdm as TQ
 
 import networkx as nx
 
@@ -32,15 +33,51 @@ class nxGraph(ABC):
     :ivar dedges: A dictionary of edges of the graph in the format of
         (``u``, ``v``) as the dictionary key and edge is any of the
         derived edge object from :mod:`routicle.components` module.
+
+    :ivar initgraph: Initialize graph with the provided nodes and the
+        edges informations. If set to True (default), then internally
+        all the edges and nodes are created.
+
+    Basic Usage(s)
+    --------------
+
+    The ``nxGraph`` is a type of :mod:`networkx.Graph` component which
+    is the core component based on which any type of calculations and
+    forward integration with external modules like :mod:`pulp` or
+    :mod:`ortools` is also done.
+
+    .. code-block:: python
+
+        import networkx as nx # actual module
+        import routicle.core.networkx as rnx
+
+        # define sets of nodes, edges using routicle.components
+        nodes = ...
+        edges = ...
+
+        # convert the nodes, edges to dnodes and dedges as dictionary
+        dnodes = { node.name : node for node in nodes }
+        dedges = { (u.name, v.name) : edge for ... }
+
+        # model graph is always a routicle component
+        network = rnx.nxGraph(
+            G = nx.DiGraph() # created a directed graph
+            dnodes = dnodes, dedges = dedges
+        )
     """
 
     def __init__(
         self,
         G : nx.Graph,
         dnodes : Dict[str, PointOfInterest],
-        dedges : Dict[Tuple[str, str], POIConnector]
+        dedges : Dict[Tuple[str, str], POIConnector],
+        initgraph : bool = True
     ) -> None:
         self.G = G
+
+        # initialize graph with nodes and edges, on true
+        if initgraph:
+            self.__init_graph__(dnodes = dnodes, dedges = dedges)
 
         # ? The graph components from routicle
         self.dnodes = self.__set_dnodes__(G = self.G, nodes = dnodes)
@@ -118,3 +155,23 @@ class nxGraph(ABC):
             "Configuration Error:: Missing Graph Edges."
 
         return edges # return the passed dedges, after assertion
+
+
+    def __init_graph__(
+        self,
+        dnodes : Dict[str, PointOfInterest],
+        dedges : Dict[Tuple[str, str], POIConnector]
+    ) -> None:
+        print("Initializing Graph with Nodes & Edges")
+
+        for node in TQ(dnodes.values(), desc = "Creating Nodes"):
+            self.G.add_node(
+                node.name, color = node.color, **node.attributes
+            )
+
+        for edge in TQ(dedges.values(), desc = "Creating Edges"):
+            self.G.add_edge(
+                edge.unode.name, edge.vnode.name, **edge.attributes
+            )
+
+        return None

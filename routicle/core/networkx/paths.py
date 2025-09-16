@@ -58,10 +58,16 @@ class PathAnalysis(nxGraph):
         G : nx.Graph,
         dnodes : Dict[str, PointOfInterest],
         dedges : Dict[Tuple[str, str], POIConnector],
+        initgraph : bool = True,
         source : PointOfInterest | str = None,
         target : PointOfInterest | str = None
     ) -> None:
-        super().__init__(G = G, dnodes = dnodes, dedges = dedges)
+        super().__init__(
+            G = G,
+            dnodes = dnodes,
+            dedges = dedges,
+            initgraph = initgraph
+        )
         self.source, self.target = self.__set_path__(source, target)
 
 

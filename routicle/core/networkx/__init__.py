@@ -9,11 +9,12 @@ same acronym ``nx`` as the parent module import.
 
 .. code-block:: python
 
-    import routicle.nx as ronx
+    import routicle.nx as rnx
     ...
 
 The module is implemented on an OOP approach, and all the base method
 and functions are defined under the ``base.py`` file.
 """
 
+from routicle.core.networkx.base import nxGraph # noqa: F401, F403
 from routicle.core.networkx.paths import PathAnalysis # noqa: F401, F403
