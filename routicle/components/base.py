@@ -155,10 +155,8 @@ class BaseComponent(BaseModel, ABC):
         idgen = data.get("idgen", lambda _ : None)
         useselfname = data.get("useselfname", False)
 
-        idgenargs = data.get(
-            "idgenargs", [self.name] + [None]
-            if useselfname else [None]
-        )
+        idgenargs = data.get("idgenargs", [None])
+        idgenargs = [self.name] + idgenargs if useselfname else idgenargs
 
         self.cidx = self.cidx or idgen(*idgenargs)
 
@@ -357,7 +355,7 @@ class POIConnector(BaseComponent):
         default, the private variable usage is used to override.
         """
 
-        allowed = ["_color"] # only allow the defined
+        allowed = ["_color", "cidx"] # only allow the defined
 
         if name not in allowed:
             raise ValueError(f"Attribute `{name}` is Immutable.")
