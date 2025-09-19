@@ -136,6 +136,20 @@ class nxGraph(ABC):
         ) -> PointOfInterest | POIConnector:
         """
         Get the Node/Edge Element from the CIDX Attribute
+
+        Each component of the network (namely ``nodes`` and ``edges``)
+        should be initialized with an unique identity to maintain
+        consistency and easy lookup by a developer during the debug
+        process. The function returns a component based on the key.
+
+        :type  cidx: str
+        :param cidx: The unique identity of the component as defined
+            under the :attr:`cidx` attribute during initialization.
+
+        :type  component: str
+        :param component: Look for either the ``node`` or the ``edge``
+            from the network. Use the network callables to find the
+            node/edge details.
         """
 
         component = component.lower()
