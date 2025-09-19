@@ -129,6 +129,7 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
 
         # add the variables to the problem definition
         self += self.__define_objective__(), "Objective Function"
+        self.__set_variable_bounds__() # set bounds and category
 
 
     @property
@@ -233,6 +234,30 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
         """
 
         return self.solve()
+
+
+    def __set_variable_bounds__(self) -> None:
+        """
+        Define the Constraints with Bounds for Optimization Problem
+        """
+
+        variables = self.nvariables
+        for idx, variable in enumerate(variables):
+            e = dict(
+                self.network.getbycidx(
+                    str(variable), component = "edge"
+                )
+            )
+
+            lb = e.get(self.lbattr, 0.0)
+            ub = e.get(self.ubattr, None)
+            category = e.get(self.varcategory, "Integer")
+            # update the bound values, category
+            self.nvariables[idx].lowBound = lb
+            self.nvariables[idx].upBound = ub
+            self.nvariables[idx].category = category
+
+        return None
 
 
     def __define_objective__(self) -> None:
