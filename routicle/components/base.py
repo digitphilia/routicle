@@ -8,6 +8,8 @@ the typical attributes and constraints of a component - like a node
 and an edge of a graph.
 """
 
+import re
+
 from typing import Any, Optional
 from abc import ABC, abstractmethod
 
@@ -106,8 +108,9 @@ class BaseComponent(BaseModel, ABC):
         :type  idgen: callable
         :param idgen: A callable function which is used to generate
             the value for the unique value. The control of the function
-            is provided by additional parameters as below. Defaults
-            to ``lambda _ : None`` i.e., returns None value.
+            is provided by additional parameters as below. By default,
+            the name is parsed using ``re.findall(r"\w", self.name)``
+            and set to upper case.
 
         :type  idgenargs: list
         :param idgenargs: Arguments for additional controls which is
@@ -152,11 +155,15 @@ class BaseComponent(BaseModel, ABC):
         })
 
         # id generator function, defaults to None value
-        idgen = data.get("idgen", lambda _ : None)
-        useselfname = data.get("useselfname", False)
+        idgen = data.get(
+            "idgen",
+            lambda name, *_ : "".join(re.findall(r"\w", name)).upper()
+        )
+        useselfname = data.get("useselfname", True)
 
         idgenargs = data.get("idgenargs", [None])
-        idgenargs = [self.name] + idgenargs if useselfname else idgenargs
+        idgenargs = [self.name] + idgenargs if useselfname \
+            else idgenargs
 
         self.cidx = self.cidx or idgen(*idgenargs)
 
