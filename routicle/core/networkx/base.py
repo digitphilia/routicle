@@ -161,7 +161,10 @@ class nxGraph(ABC):
 
 
     def adjacent_nodes(
-            self, node : str, undirected : bool = False
+            self,
+            node : str,
+            reverse : bool = False,
+            undirected : bool = False
         ) -> tuple:
         """
         Return a Tuple of Adjacent Nodes for the Selected Node
@@ -173,11 +176,16 @@ class nxGraph(ABC):
         :param node: The node from the graph, which must be present
             else underlying error is raised.
 
+        :type  reverse: str
+        :param reverse: Reverse the edges direction, only applicable
+            if this is a directed graph and not :attr:`undirected`.
+
         :type  undirected: bool
         :param undirected: Convert a directed graph to an undirected
             one (if required), defaults to False.
         """
 
+        G = self.G.reverse() if reverse else self.G
         G = self.G.to_undirected() if undirected else self.G
         return tuple(G.neighbors(node))
 
