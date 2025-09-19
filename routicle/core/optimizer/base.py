@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 import pulp as p
 
 from routicle.core.networkx import nxGraph
+from routicle.components.base import PointOfInterest
 
 class BaseOptimizerModel(BaseModel, ABC):
     model_config = ConfigDict(extra = "allow")
@@ -41,6 +42,20 @@ class BaseOptimizerModel(BaseModel, ABC):
     def nconstraints(self) -> Iterable:
         """
         Returns the Constraints for the Optimization Problem
+        """
+
+        pass
+
+
+    @abstractmethod
+    def create_constraints(
+        self, demandnodes : Iterable[PointOfInterest]
+    ) -> Iterable:
+        """
+        Create the Constraints for the Optimization Problem
+
+        Given a set of demand variable, automatically define the
+        constraints by finding the connected nodes to the demand point.
         """
 
         pass
@@ -138,6 +153,12 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
     @property
     def nconstraints(self) -> dict:
         return self.constraints
+    
+
+    def create_constraints(
+        self, demandnodes : Iterable[PointOfInterest]
+    ) -> Iterable:
+        pass    
 
 
     def optimize(self, *args, **kwargs) -> None:

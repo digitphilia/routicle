@@ -186,7 +186,7 @@ class nxGraph(ABC):
         """
 
         G = self.G.reverse() if reverse else self.G
-        G = self.G.to_undirected() if undirected else self.G
+        G = G.to_undirected() if undirected else G
         return tuple(G.neighbors(node))
 
 
