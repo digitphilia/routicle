@@ -111,6 +111,7 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
 
         # add the variables to the problem definition
         p.LpProblem.addVariables(self, self.nvariables)
+        self += self.__define_objective__(), "Objective Function"
 
 
     @property
@@ -162,3 +163,16 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
         """
 
         return self.solve()
+
+
+    def __define_objective__(self) -> None:
+        """
+        Define Objective Function from the Defined Network Edges
+        """
+
+        edgevars = []
+        for edge in self.network.G.edges:
+            edge = self.network.inspect(edge, component = "edge")
+            edgevars.append(edge.weight * p.LpVariable(edge.cidx))
+
+        return p.lpSum(edgevars)
