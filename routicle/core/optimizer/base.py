@@ -192,7 +192,7 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
             ])))
         }
 
-        iterables = list()
+        supplyiter = list()
         for s in supply.values():
             iterable = [self.network.dedges[
                 (s["object"].name, d)].cidx for d in s["demanders"]
@@ -200,7 +200,7 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
 
             # the defined iterable is the edges name, get the varname
             # from the defined variables set and add constraint
-            iterables.append({
+            supplyiter.append({
                 "object" : s["object"],
                 "variables" : [
                     self.nvariables[pos]
@@ -209,7 +209,22 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
                 ]
             })
 
-        return demand, supply, iterables
+        demanditer = list()
+        for d in demand.values():
+            iterable = [self.network.dedges[
+                (s, d["object"].name)].cidx for s in d["suppliers"]
+            ]
+
+            demanditer.append({
+                "object" : d["object"],
+                "variables" : [
+                    self.nvariables[pos]
+                    for pos, varname in enumerate(self.nvariables)
+                    if str(varname) in iterable
+                ]
+            })
+
+        return demand, supply, supplyiter, demanditer
 
 
     def optimize(self, *args, **kwargs) -> None:
