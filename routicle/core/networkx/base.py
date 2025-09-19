@@ -129,6 +129,45 @@ class nxGraph(ABC):
         return di[name] # value assertion on initialization
 
 
+    def getbycidx(
+            self,
+            cidx : str,
+            component : str = "node"
+        ) -> PointOfInterest | POIConnector:
+        """
+        Get the Node/Edge Element from the CIDX Attribute
+        """
+
+        component = component.lower()
+        assert component in ["node", "edge"], \
+            f"Component: {component} is not Valid."
+
+        di = self.dnodes if component == "node" else self.dedges
+        return [comp for comp in di.values() if comp.cidx == cidx][0]
+
+
+    def adjacent_nodes(
+            self, node : str, undirected : bool = False
+        ) -> tuple:
+        """
+        Return a Tuple of Adjacent Nodes for the Selected Node
+
+        Uses the internal graph method to find and return a tuple of
+        adjacent nodes from the defined networkx graph.
+
+        :type  node: str
+        :param node: The node from the graph, which must be present
+            else underlying error is raised.
+
+        :type  undirected: bool
+        :param undirected: Convert a directed graph to an undirected
+            one (if required), defaults to False.
+        """
+
+        G = self.G.to_undirected() if undirected else self.G
+        return tuple(G.neighbors(node))
+
+
     def __set_dnodes__(
         self,
         G : nx.Graph,
