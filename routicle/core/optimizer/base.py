@@ -156,9 +156,58 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
     
 
     def create_constraints(
-        self, demandnodes : Iterable[PointOfInterest]
-    ) -> Iterable:
-        pass    
+        self,
+        demandnodes : Iterable[PointOfInterest],
+        demandattrname : str = "demand"
+    ) -> dict:
+        """
+        Create an Ierable of Constraints for the Demand Nodes
+        """
+
+        demand = {
+            idx : {
+                "object" : node,
+                "demand" : dict(node)[demandattrname],
+                "suppliers" : self.network.adjacent_nodes(
+                    node.name, reverse = True
+                )
+            }
+            for idx, node in enumerate(demandnodes)
+        }
+
+        supply = {
+            idx : {
+                "object" : self.network.dnodes[supplier],
+                "demanders" : self.network.adjacent_nodes(
+                    self.network.dnodes[supplier].name
+                )
+            }
+            for idx, supplier in enumerate(list(set([
+                supplier for suppliers in [
+                    value["suppliers"] for value in demand.values()
+                ]
+                for supplier in suppliers
+            ])))
+        }
+
+        iterables = list()
+        for s in supply.values():
+            iterable = [self.network.dedges[
+                (s["object"].name, d)].cidx for d in s["demanders"]
+            ]
+
+            # the defined iterable is the edges name, get the varname
+            # from the defined variables set and add constraint
+            iterables.append({
+                "object" : s["object"],
+                "variables" : [
+                    self.nvariables[pos]
+                    for pos, varname in enumerate(self.nvariables)
+                    if str(varname) in iterable
+                ]
+            })
+
+        return demand, supply, iterables
 
 
     def optimize(self, *args, **kwargs) -> None:
