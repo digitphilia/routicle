@@ -87,12 +87,13 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
     while the generalized function like :func:`.optimize()` is also
     available to the end users.
 
-    :type  varname, lb, ub, varcategory: str
-    :param varname, lb, ub, varcategory: The node property with which
-        the ``p.LpVariable`` is initialized for ``[name, lowBound,
-        upBound, cat]`` attribute respectively. The default values
-        are the node attributes ``[cidx, mincapacity, maxcapacity,
-        varcategory]`` which if not defined uses the ``p.LpVariable``.
+    :type  varname, lbattr, ubattr, varcategory: str
+    :param varname, lbattr, ubattr, varcategory: The node property
+        with which the ``p.LpVariable`` is initialized for ``[name,
+        lowBound, upBound, cat]`` attribute respectively. The default
+        values are the node attributes ``[cidx, minvalue, maxvalue,
+        varcategory]`` which if not defined uses the default value as
+        ``[<node.name>, 0.0, None, "Integer"]`` values.
     """
 
     varname : Optional[str] = Field(
@@ -101,16 +102,15 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
     varcategory : Optional[str] = Field(
         "varcategory", description = "Field for Variable Category"
     )
-    
-    lb : Optional[str] = "mincapacity"
-    ub : Optional[str] = "maxcapacity"
+
+    lbattr : Optional[str] = "minvalue"
+    ubattr : Optional[str] = "maxvalue"
 
     def __init__(self, **data) -> None:
         BaseOptimizerModel.__init__(self, **data)
         p.LpProblem.__init__(self, self.name, sense = self._sense)
 
         # add the variables to the problem definition
-        p.LpProblem.addVariables(self, self.nvariables)
         self += self.__define_objective__(), "Objective Function"
 
 
@@ -122,7 +122,7 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
     @property
     def nvariables(self) -> Iterable[p.LpVariable]:
         """
-        Get and Create LP Variables from the NetworkX Graph
+        Return the LP Variables from the NetworkX Graph
 
         The ``nvariables`` for a :mod:`pulp` model is an iterable of
         :attr:`p.LpVariable` with a set of attributes defined from
@@ -131,30 +131,13 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
         values. In addition, the node attributes are mutated to not
         be null when setting bounds which is updated by :mod:`pulp`.
         """
-
-        rvalue = []
-        for node in self.network.G.nodes:
-            node = dict(self.network.inspect(node))
-
-            # mutate infinity values to None, controlled by pulp
-            lb, ub = node.get(self.lb, None), node.get(self.ub, None)
-            lb, ub = list(map(
-                lambda x : None if x in [float("inf"), float("-inf")]
-                else x, [lb, ub]
-            ))
-
-            rvalue.append(p.LpVariable(
-                name = node.get(self.varname, node["name"]),
-                lowBound = lb, upBound = ub,
-                cat = node.get(self.varcategory, "Continuous")
-            ))
-
-        return rvalue
+        
+        return self.variables()
 
 
     @property
-    def nconstraints(self) -> Iterable:
-        return None
+    def nconstraints(self) -> dict:
+        return self.constraints
 
 
     def optimize(self, *args, **kwargs) -> None:
