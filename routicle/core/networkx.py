@@ -195,7 +195,7 @@ class nxGraph(ABC):
             one (if required), defaults to False.
         """
 
-        assert any(reverse, undirected), "Both the parameter is False"
+        assert reverse ^ undirected, "Invalid Combination, Try Again."
 
         G = self.G.reverse() if reverse else self.G
         G = G.to_undirected() if undirected else G
