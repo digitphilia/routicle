@@ -235,10 +235,13 @@ class nxGraph(ABC):
 
     def getpaths(
             self,
+            source : PointOfInterest | str,
+            target : PointOfInterest | str,
             rtype : str = "complete",
             attribute : str = "weight",
             calculate : str = "multiplicative",
-            nxcostfunc : Callable = nx.dijkstra_path_length
+            nxcostfunc : Callable = nx.dijkstra_path_length,
+            **kwargs
         ) -> Iterable:
         """
         Check & Return All Simple Paths b/w Source and Target Node
@@ -308,13 +311,25 @@ class nxGraph(ABC):
 
         The above format give the flixibility to iterate paths and the
         calculated weights as a :func:`zip` function in forward models.
+
+        Keyword Argument(s)
+        -------------------
+
+        Additional keyword arguments to manipulate the output and
+        presentation are as follows:
+
+            * **roundvalue** (*int*): Round numeric values to desired
+              number of numeric place, defaults to None, i.e., no
+              rounding.
         """
 
+        roundvalue = kwargs.get("roundvalue", None)
+
         source, target = self.__set_path__(
-            source = source, destination = destination
+            source = source, target = target
         )
         augmentedpaths = nx.all_simple_paths(
-            self.G, source = self.source, target = self.target
+            self.G, source = source, target = target
         )
 
         allpaths = dict(
@@ -323,8 +338,8 @@ class nxGraph(ABC):
             ),
 
             # default class values, decorations
-            source = self.source,
-            target = self.target,
+            source = source,
+            target = target,
         )
 
         # add the edge attribute for weights calculations
@@ -349,6 +364,12 @@ class nxGraph(ABC):
             for weight in allpaths["paths"]["weights"]
         ]
 
+        if roundvalue:
+            allpaths["paths"]["weights"] = [
+                round(value, roundvalue)
+                for value in allpaths["paths"]["weights"]
+            ]
+
         allpaths["paths"]["costs"] = [
             sum([
                 nxcostfunc(
@@ -361,6 +382,12 @@ class nxGraph(ABC):
             ])
             for path in allpaths["paths"]["edges"]
         ]
+
+        if roundvalue:
+            allpaths["paths"]["costs"] = [
+                round(value, roundvalue)
+                for value in allpaths["paths"]["costs"]
+            ]
 
         # remove edges, if rtype is nodes::
         if rtype == "nodes":
@@ -377,6 +404,8 @@ class nxGraph(ABC):
 
     def sortedpaths(
             self,
+            source : PointOfInterest | str,
+            target : PointOfInterest | str,
             sense : int = 1,
             cattribute : str = "costs",
             **kwargs
@@ -453,11 +482,16 @@ class nxGraph(ABC):
         """
 
         paths = self.getpaths(
+            source = source, target = target,
             attribute = kwargs.get("attribute", "weight"),
             calculate = kwargs.get("calculate", "multiplicative"),
             nxcostfunc = kwargs.get(
                 "nxcostfunc", nx.dijkstra_path_length
-            )
+            ),
+            **{
+                k : v for k, v in kwargs.items()
+                if k in ["roundvalue"] # getpaths keyword args
+            }
         )["paths"]
 
         n = len(paths[cattribute]) # raise key error, intentional
@@ -486,7 +520,7 @@ class nxGraph(ABC):
         })
 
         # keep the dictionary structure as same as self.getpaths()
-        spaths |= dict(source = self.source, target = self.target)
+        spaths |= dict(source = source, target = target)
 
         return spaths
 
@@ -544,7 +578,7 @@ class nxGraph(ABC):
     ) -> None:
         nodes, edges = dnodes.values(), dedges.values()
 
-        for node in TQ(dnodes.values(), desc = "Creating Nodes"):
+        for node in nodes:
             self.G.add_node(
                 node.name, color = node.color, **node.attributes
             )
