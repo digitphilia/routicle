@@ -121,12 +121,7 @@ class nxGraph(ABC):
         :attr:`routicle.components.edges.TimeCostEdge` objects.
         """
 
-        component = component.lower()
-        assert component in ["node", "edge"], \
-            f"Component: {component} is not Valid."
-
-        di = self.dnodes if component == "node" else self.dedges
-        return di[name] # value assertion on initialization
+        return self.__get_component__(component = component)[name]
 
 
     def getbycidx(
@@ -152,12 +147,8 @@ class nxGraph(ABC):
             node/edge details.
         """
 
-        component = component.lower()
-        assert component in ["node", "edge"], \
-            f"Component: {component} is not Valid."
-
-        di = self.dnodes if component == "node" else self.dedges
-        return [comp for comp in di.values() if comp.cidx == cidx][0]
+        component = self.__get_component__(component = component)
+        return [c for c in component.values() if c.cidx == cidx][0]
 
 
     def alter(self, reverse : bool, undirected : bool) -> nx.Graph:
@@ -213,6 +204,23 @@ class nxGraph(ABC):
 
         G = self.alter(reverse = reverse, undirected = undirected)
         return tuple(G.neighbors(node))
+    
+
+    def __get_component__(
+            self, component : str
+        ) -> PointOfInterest | POIConnector:
+        """
+        Return the Graph Component(s) (Node/Edge) based on Requirement
+        """
+
+        component = component.lower()
+        assert component in ["node", "edge"], \
+            f"Component: {component} is not Valid."
+
+        component = self.dnodes if component == "node" \
+            else self.dedges
+        
+        return component
 
 
     def __set_dnodes__(
