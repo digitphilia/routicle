@@ -4,6 +4,8 @@
 Defination of a Edges Attributes for a Gaph
 """
 
+from pydantic import ConfigDict
+
 from routicle.components.base import POIConnector
 
 class TimeCostEdge(POIConnector):
@@ -21,6 +23,8 @@ class TimeCostEdge(POIConnector):
         cost etc. for the transport. This is also typically requires a
         minimization approach.
     """
+
+    model_config = ConfigDict(extra = "allow")
 
     time : float
     cost : float
