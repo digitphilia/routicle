@@ -160,6 +160,32 @@ class nxGraph(ABC):
         return [comp for comp in di.values() if comp.cidx == cidx][0]
 
 
+    def alter(self, reverse : bool, undirected : bool) -> nx.Graph:
+        """
+        Format the Graph by using In-Built Functionalities
+
+        Format the graph using in-built functionalities like reverse
+        the order of the graph (if ``nx.DiGraph``) or make the graph
+        uniderected, etc. as per requirement. The function returns the
+        modified graph, without changing the original format.
+
+        :type  reverse: bool
+        :param reverse: Reverse the edges direction, only applicable
+            if this is a directed graph and not :attr:`undirected`.
+
+        :type  undirected: bool
+        :param undirected: Convert a directed graph to an undirected
+            one (if required), defaults to False.
+        """
+
+        assert any(reverse, undirected), "Both the parameter is False"
+
+        G = self.G.reverse() if reverse else self.G
+        G = G.to_undirected() if undirected else G
+
+        return G
+
+
     def adjacent_nodes(
             self,
             node : str,
@@ -185,8 +211,7 @@ class nxGraph(ABC):
             one (if required), defaults to False.
         """
 
-        G = self.G.reverse() if reverse else self.G
-        G = G.to_undirected() if undirected else G
+        G = self.alter(reverse = reverse, undirected = undirected)
         return tuple(G.neighbors(node))
 
 
