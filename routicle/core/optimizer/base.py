@@ -26,7 +26,7 @@ class BaseOptimizerModel(BaseModel, ABC):
     network : object = Field(..., description = "Routicle NetworkX")
 
     # define the sense, for minimization/maximization
-    sense : int = Field(1, description = "Objective of the Problem")
+    sense : int = Field(-1, description = "Objective of the Problem")
 
 
     @property
@@ -149,7 +149,7 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
         values. In addition, the node attributes are mutated to not
         be null when setting bounds which is updated by :mod:`pulp`.
         """
-        
+
         return self.variables()
 
 
@@ -228,13 +228,18 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
         return demand, supply, supplyiter, demanditer
 
 
-    def optimize(self, *args, **kwargs) -> None:
+    def optimize(self, verbose : bool = True) -> int:
         """
         A PuLP Optimization using Objective Function on a Graph
         """
 
-        return self.solve()
+        status = self.solve()
 
+        if verbose:
+            print(f"Solver Status: {p.LpStatus[status]}")
+            print(f"Target Objective: {p.value(self.objective):,.2f}")
+
+        return status
 
     def __set_variable_bounds__(self) -> None:
         """
