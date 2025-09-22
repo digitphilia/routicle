@@ -7,7 +7,6 @@ An Abstract Base Method for Routicle Optimization
 from abc import ABC
 from math import prod
 from itertools import pairwise
-from tqdm.auto import tqdm as TQ
 from typing import Dict, Tuple, Callable, Iterable
 
 import networkx as nx
@@ -542,14 +541,14 @@ class nxGraph(ABC):
         dnodes : Dict[str, PointOfInterest],
         dedges : Dict[Tuple[str, str], POIConnector]
     ) -> None:
-        print("Initializing Graph with Nodes & Edges")
+        nodes, edges = dnodes.values(), dedges.values()
 
         for node in TQ(dnodes.values(), desc = "Creating Nodes"):
             self.G.add_node(
                 node.name, color = node.color, **node.attributes
             )
 
-        for edge in TQ(dedges.values(), desc = "Creating Edges"):
+        for edge in edges:
             self.G.add_edge(
                 edge.unode.name, edge.vnode.name, **edge.attributes
             )
