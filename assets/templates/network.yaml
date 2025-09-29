@@ -1,0 +1,88 @@
+version: v1.0.0
+
+about:
+  name: Template for Defining Network for SOB Optimization
+  desc: >
+    The template file is defined in a YAML structure to provide a
+    recommended structure for network. The network ensures that the
+    components and its attributes follows the ``routicle`` module.
+
+
+components:
+  # define the constants like num. of plants, vendors, etc.
+  # in addition, define some constants which are associated like name
+  ports:
+    count: null
+    names: []
+
+  plants:
+    count: 5
+    names:
+      - PA Unit-I
+      - PB Unit-II
+      - PC Unit-I
+      - PD Unit-III
+      - PE Unit-I
+
+  vendors:
+    count: 3
+    names:
+      - VA Ltd.
+      - VB Co. Ltd.
+      - VC Industry
+
+  warehouses:
+    count: null
+    names: []
+
+
+attributes:
+  # define any generic attributes, which are either part of the
+  # mandatory attributes of the components, or can be any desired
+  ports: {}
+
+  plants:
+    0:
+      rate   : 0.0
+      demand : 12.0
+    1:
+      rate   : 0.0
+      demand : 9.0
+    2:
+      rate   : 0.0
+      demand : 4.0
+    3:
+      rate   : 0.0
+      demand : 1.0
+    4:
+      rate   : 0.0
+      demand : 4.0
+
+  vendors:
+    0:
+      moq         : 5.0
+      minorder    : 5.0
+      packsize    : 1.0
+      maxcapacity : 100.0
+    1:
+      moq         : 0.0
+      minorder    : 0.0
+      packsize    : 1.0
+      maxcapacity : 15.0
+    2:
+      moq         : 0.0
+      minorder    : 0.0
+      packsize    : 1.0
+      maxcapacity : 15.0
+
+
+costmatrix:
+  # vendor to plant cost matrix, typically cost of raw material
+  v2p:
+    [
+      [87.24, 85.75, 85.50],
+      [87.24, 85.75, 85.50],
+      [87.24, 85.75, 85.50],
+      [87.24, 85.00, 86.50],
+      [91.49, 89.00, .inf]
+    ]
