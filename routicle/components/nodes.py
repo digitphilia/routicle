@@ -30,6 +30,12 @@ class StorageUnits(PointOfInterest):
     for storage and transfer from and to one location to another. Check
     :class:`TimeCostEdge` for more information.
 
+    :type  available: float
+    :param available: Available quantity at the storage location, this
+        can be any float value and necessary objective may be defined
+        to satisfy the minimum demand at the storage location, else in
+        case of excess STO can be done.
+
     Usage Example(s)
     ----------------
 
@@ -47,6 +53,10 @@ class StorageUnits(PointOfInterest):
     """
 
     model_config = ConfigDict(extra = "allow")
+
+    available : float = Field(
+        0.0, description = "Available Capacity at Storage"
+    )
 
     image : Optional[str] = Field(
         "../assets/icons/warehouse.png",
