@@ -156,7 +156,7 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
     @property
     def nconstraints(self) -> dict:
         return self.constraints
-    
+
 
     def create_constraints(
         self,
@@ -273,7 +273,14 @@ class PuLPModel(BaseOptimizerModel, p.LpProblem):
         edgevars = []
         for edge in self.network.G.edges:
             edge = self.network.inspect(edge, component = "edge")
-            edgevars.append(edge.weight * p.LpVariable(edge.cidx))
+
+            # ..versionadded:: 2025-09-25 - Include Pack Size (if any)
+            # get the value, (from ``unode``, if defined) else 1.0
+            packsize = dict(edge.unode).get("packsize", 1.0)
+
+            edgevars.append(
+                edge.weight * packsize * p.LpVariable(edge.cidx)
+            )
 
         return p.lpSum(edgevars)
 
