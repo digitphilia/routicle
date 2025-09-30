@@ -192,10 +192,6 @@ class SupplyPoints(PointOfInterest):
         assert ps > 0.0, \
             f"{selfname} - Pack Size <= 0.0, Not Possible"
 
-        assert ((moq > 0.0) and (moq >= mo)) or (moq == 0.0), \
-            f"{selfname} - Min. Order Quantity (MOQ = {moq}) "\
-            + f"is defined, but MOQ < Min. Order {mo}"
-
         if moq % ps != 0:
             warnings.warn("Pack Size is not a Multiple of MOQ")
 
