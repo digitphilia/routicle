@@ -12,12 +12,12 @@ import sys
 sys.path.append(os.path.abspath(os.path.join("..")))
 
 # first import module, then define/call module attributes
-import routicle as ro # noqa: F401, F403 # pyright: ignore[reportMissingImports]
+import routicle # noqa: F401, F403 # pyright: ignore[reportMissingImports]
 
 project = "Route Optimization"
 copyright = "2025, DigitPhilia INC"
 author = "DigitPhilia INC"
-release = ro.__version__
+release = routicle.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
