@@ -11,12 +11,13 @@ import sys
 # ? insert the project paths to let sphinx recognize/find packages
 sys.path.append(os.path.abspath(os.path.join("..")))
 
+# first import module, then define/call module attributes
+import routicle as ro # noqa: F401, F403 # pyright: ignore[reportMissingImports]
+
 project = "Route Optimization"
 copyright = "2025, DigitPhilia INC"
 author = "DigitPhilia INC"
 release = ro.__version__
-
-import routicle as ro # noqa: F401, F403 # pyright: ignore[reportMissingImports]
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
