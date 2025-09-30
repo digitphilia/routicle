@@ -16,7 +16,6 @@ copyright = "2025, DigitPhilia INC"
 author = "DigitPhilia INC"
 release = open(os.path.abspath(os.path.join("..", "VERSION")), "r").read()
 
-# WIP import all modules, house-keeping
 import routicle as ro # noqa: F401, F403 # pyright: ignore[reportMissingImports]
 
 # -- General configuration ---------------------------------------------------
