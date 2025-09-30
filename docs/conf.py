@@ -14,7 +14,7 @@ sys.path.append(os.path.abspath(os.path.join("..")))
 project = "Route Optimization"
 copyright = "2025, DigitPhilia INC"
 author = "DigitPhilia INC"
-release = open(os.path.abspath(os.path.join("..", "VERSION")), "r").read()
+release = ro.__version__
 
 import routicle as ro # noqa: F401, F403 # pyright: ignore[reportMissingImports]
 
