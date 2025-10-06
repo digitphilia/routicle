@@ -13,7 +13,7 @@ import re
 from typing import Any, Optional
 from abc import ABC, abstractmethod
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 class BaseComponent(BaseModel, ABC):
     """
@@ -87,6 +87,8 @@ class BaseComponent(BaseModel, ABC):
     always defined from base component objects, while an environment
     and related attributes should be modeled accordingly.
     """
+
+    model_config = ConfigDict(extra = "allow")
 
     name : str = Field(..., description = "Name of the Component")
     cidx : Optional[str] = Field(None, description = "Unique Identity")

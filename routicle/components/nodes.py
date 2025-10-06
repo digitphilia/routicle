@@ -52,8 +52,6 @@ class StorageUnits(PointOfInterest):
     be refined externally.
     """
 
-    model_config = ConfigDict(extra = "allow")
-
     available : float = Field(
         0.0, description = "Available Capacity at Storage"
     )
@@ -85,8 +83,6 @@ class ManufacturingUnits(PointOfInterest):
     In addition, any type of additional attributes are allowed to be
     passed for further calculations and enhancements.
     """
-
-    model_config = ConfigDict(extra = "allow")
 
     image : Optional[str] = Field(
         "../assets/icons/conveyor.png",
@@ -131,8 +127,6 @@ class SupplyPoints(PointOfInterest):
     In addition, any type of additional attributes are allowed to be
     passed for further calculations and enhancements.
     """
-
-    model_config = ConfigDict(extra = "allow")
 
     image : Optional[str] = Field(
         "../assets/icons/vendor.png",
