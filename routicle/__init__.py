@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 
 """
-Route (Optimzation) Miracles : Routicle Module
-
 An inventory planning, stock routing and optimization library using
 graph theory and shortest path detection algorithm like Dijkstra/A*
 optimization using ``networkx`` and ``gravis`` for visualization.
@@ -12,9 +10,6 @@ from the defined network any type of optimization and prediction can
 be carried out. This approach ensures uniform approach and utility
 functions are provided to provide a wrapper for external modules like
 ``pulp`` or ``ortools`` for supply chain optimizations.
-
-@author: Debmalya Pramanik
-@copywright: 2024; Debmalya Pramanik
 """
 
 import os
