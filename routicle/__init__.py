@@ -16,7 +16,9 @@ import os
 
 # ? package follows https://peps.python.org/pep-0440/
 # ? https://python-semver.readthedocs.io/en/latest/advanced/convert-pypi-to-semver.html
-__version__ = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION"), "r").read()
+__version__ = open(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "VERSION"
+), "r").read()
 
 # init-time options registrations
 from routicle import utils # noqa: F401, F403
