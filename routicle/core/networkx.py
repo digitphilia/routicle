@@ -2,7 +2,18 @@
 
 """
 An Abstract Base Method for Routicle Optimization
+
+The module is built on top of :mod:`networkx` module giving the edge
+of providing default graph based visualizations which is effective in
+case of debugging and analysis of components with ease - well, visuals
+do provide the edge! The :class:`nxGraph` can be initialized with any
+type of graph - directional, non-directional etc. from the parent
+module and extended methods are provided which provides code snippets
+for ready-to-use and/or frequently used methods of a graph like
+finding the shortest paths based on algorithm (Dijsktra/A*) of choice.
 """
+
+import warnings
 
 from abc import ABC
 from math import prod
@@ -99,6 +110,23 @@ class nxGraph(ABC):
         dedges : Dict[Tuple[str, str], POIConnector],
         initgraph : bool = True
     ) -> None:
+        """
+        Initialization Method of :class:`nxGraph` with Graph Object
+
+        The class is intenionally does not inherit the properties of
+        :func:`networkx.Graph` as we give the flexibility to utilise
+        any type of graph or directed graph :func:`networkx.DiGraph`
+        both of which can be used for different purposes. However, for
+        a typical supply chain problem this should be a directed
+        graph unless bi-directionall movement is allowed (which is
+        a rare event/case in production).
+
+        The attribute ``dnodes`` and ``dedges`` are dynamic which is
+        a subset of the graph and provides named entities and other
+        different scenarios which makes the object dynamic, but also
+        preserving the entities of a graph, i.e., a node and an edge.
+        """
+
         self.G = G
 
         # initialize graph with nodes and edges, on true
@@ -145,6 +173,15 @@ class nxGraph(ABC):
         The utility function is useful for quick inspection and lookup
         of calculated attributes from an underlying derived edge like
         :attr:`routicle.components.edges.TimeCostEdge` objects.
+
+        :type  name: str | tuple(str, str)
+        :param name: Name of the component for inspection which can
+            either be name of a node or an edge present in the graph.
+
+        :type  component: str
+        :param component: Name of the graph component for inspection,
+            defaults to "node" that is to look for node with the given
+            name.
         """
 
         return self.__get_component__(component = component)[name]
@@ -166,6 +203,9 @@ class nxGraph(ABC):
         :type  cidx: str
         :param cidx: The unique identity of the component as defined
             under the :attr:`cidx` attribute during initialization.
+            Note that the :attr:`cidx` attribute is optional in the
+            object and defaults to None. Also, there is no limitation
+            to give a unique name.
 
         :type  component: str
         :param component: Look for either the ``node`` or the ``edge``
@@ -174,8 +214,15 @@ class nxGraph(ABC):
         """
 
         component = self.__get_component__(component = component)
-        return [c for c in component.values() if c.cidx == cidx][0]
+        component = [c for c in component.values() if c.cidx == cidx]
 
+        if len(component) > 1:
+            warnings.warn(
+                f"CIDX: {cidx} is Not Unique."
+                "The function will return only the first component."
+            )
+        
+        return component[0]
 
     def alter(self, reverse : bool, undirected : bool) -> nx.Graph:
         """
@@ -188,11 +235,12 @@ class nxGraph(ABC):
 
         :type  reverse: bool
         :param reverse: Reverse the edges direction, only applicable
-            if this is a directed graph and not :attr:`undirected`.
+            if this is a directed graph and not :attr:`undirected` is
+            set to true, invalid combination.
 
         :type  undirected: bool
         :param undirected: Convert a directed graph to an undirected
-            one (if required), defaults to False.
+            one (if required).
         """
 
         assert not all([reverse, undirected]), \
